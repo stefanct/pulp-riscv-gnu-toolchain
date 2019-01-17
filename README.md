@@ -24,7 +24,7 @@ Alternatively :
 Several standard packages are needed to build the toolchain.  On Ubuntu,
 executing the following command should suffice:
 
-    $ sudo apt-get install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev
+    $ sudo apt-get install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev lib32z1-dev
 
 On Fedora/CentOS/RHEL OS, executing the following command should suffice:
 
@@ -109,6 +109,7 @@ configure.  See './configure --help' for more details.
 The DejaGnu test suite has been ported to RISC-V.  This can run with GDB
 simulator for elf toolchain or Qemu for linux toolchain, and GDB simulator
 doesn't support floating-point.
+This additionally requires `dejagnu` to be installed.
 To test GCC, run the following commands:
 
     ./configure --prefix=$RISCV --disable-linux --with-arch=rv64ima # or --with-arch=rv32ima
