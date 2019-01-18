@@ -47,8 +47,8 @@ AC_ARG_ENABLE(linux,
         )
 
 AS_IF([test "x$enable_linux" != xno],
-	[AC_SUBST(default_target, linux)],
-	[AC_SUBST(default_target, newlib)])
+	[AC_SUBST(default_target, install-linux)],
+	[AC_SUBST(default_target, install-newlib)])
 
 AC_ARG_ENABLE(atomic,
 	[AS_HELP_STRING([--disable-atomic],

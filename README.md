@@ -51,7 +51,7 @@ say, `/opt/riscv`, then add `/opt/riscv/bin` to your `PATH` now.  Then, simply
 run the following command:
 
     ./configure --prefix=/opt/riscv --with-arch=rv32imc --with-cmodel=medlow --enable-multilib
-    make
+    make install-newlib
 
 This will use the multilib support to build the libraries for the various cores (riscy, zeroriscy and so on). The right libraries will be selected depending on which compiler options you use.
 
@@ -62,7 +62,7 @@ say, `/opt/riscv`, then add `/opt/riscv/bin` to your `PATH` now.  Then, simply
 run the following command:
 
     ./configure --prefix=/opt/riscv
-    make
+    make install-newlib
 
 You should now be able to use riscv-gcc and its cousins.
 
@@ -73,13 +73,13 @@ say, `/opt/riscv`, then add `/opt/riscv/bin` to your `PATH` now.  Then, simply
 run the following command:
 
     ./configure --prefix=/opt/riscv
-    make linux
+    make install-linux
 
 The build defaults to targetting RV64G (64-bit), even on a 32-bit build
 environment.  To build the 32-bit RV32G toolchain, use:
 
     ./configure --prefix=/opt/riscv --with-arch=rv32g --with-abi=ilp32d
-    make linux
+    make install-linux
 
 Supported architectures are rv32i or rv64i plus standard extensions (a)tomics,
 (m)ultiplication and division, (f)loat, (d)ouble, or (g)eneral for MAFD.
@@ -94,7 +94,7 @@ To build the Linux cross-compiler with support for both 32-bit and
 64-bit, run the following commands:
 
     ./configure --prefix=/opt/riscv --enable-multilib
-    make linux
+    make install-linux
 
 The multilib compiler will have the prefix riscv-unknown-linux-gnu-,
 rather than the usual prefix (riscv32-... or riscv64-...).

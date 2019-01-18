@@ -97,7 +97,6 @@ stamps/build-binutils-linux: $(srcdir)/riscv-binutils-gdb
 		--disable-werror \
 		--disable-nls
 	$(MAKE) -C $(notdir $@)
-	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
 
 stamps/build-linux-headers:
@@ -115,7 +114,6 @@ stamps/build-glibc-linux-headers: $(srcdir)/riscv-glibc stamps/build-gcc-linux-s
 		--with-headers=$(srcdir)/linux-headers/include \
 		--disable-multilib \
 		--enable-kernel=3.0.0
-	$(MAKE) -C $(notdir $@) install-headers
 	mkdir -p $(dir $@) && touch $@
 
 stamps/build-glibc-linux-%: $(srcdir)/riscv-glibc stamps/build-gcc-linux-stage1
@@ -142,7 +140,6 @@ stamps/build-glibc-linux-%: $(srcdir)/riscv-glibc stamps/build-gcc-linux-stage1
 		$(GLIBC_TARGET_FLAGS) \
 		$($@_LIBDIROPTS)
 	$(MAKE) -C $(notdir $@)
-	+flock $(SYSROOT)/.lock $(MAKE) -C $(notdir $@) install install_root=$(SYSROOT)
 	mkdir -p $(dir $@) && touch $@
 
 stamps/build-gcc-linux-stage1: $(srcdir)/riscv-gcc stamps/build-binutils-linux \
@@ -174,9 +171,7 @@ stamps/build-gcc-linux-stage1: $(srcdir)/riscv-gcc stamps/build-binutils-linux \
 		$(WITH_ABI) \
 		$(WITH_ARCH)
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-gcc
-	$(MAKE) -C $(notdir $@) inhibit-libc=true install-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-target-libgcc
-	$(MAKE) -C $(notdir $@) inhibit-libc=true install-target-libgcc
 	mkdir -p $(dir $@) && touch $@
 
 stamps/build-gcc-linux-stage2: $(srcdir)/riscv-gcc $(addprefix stamps/build-glibc-linux-,$(MULTILIB_NAMES)) \
@@ -202,7 +197,6 @@ stamps/build-gcc-linux-stage2: $(srcdir)/riscv-gcc $(addprefix stamps/build-glib
 		$(WITH_ABI) \
 		$(WITH_ARCH)
 	$(MAKE) -C $(notdir $@)
-	$(MAKE) -C $(notdir $@) install
 	cp -a $(INSTALL_DIR)/$(LINUX_TUPLE)/lib* $(SYSROOT)
 	mkdir -p $(dir $@) && touch $@
 
@@ -216,7 +210,6 @@ stamps/build-binutils-newlib: $(srcdir)/riscv-binutils-gdb
 		@with_guile@ \
 		--disable-werror
 	$(MAKE) -C $(notdir $@)
-	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
 
 stamps/build-gcc-newlib-stage1: $(srcdir)/riscv-gcc stamps/build-binutils-newlib
@@ -244,7 +237,6 @@ stamps/build-gcc-newlib-stage1: $(srcdir)/riscv-gcc stamps/build-binutils-newlib
 		$(WITH_ARCH) \
 		CFLAGS_FOR_TARGET="-Os $(CFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@) all-gcc
-	$(MAKE) -C $(notdir $@) install-gcc
 	mkdir -p $(dir $@) && touch $@
 
 stamps/build-newlib: $(srcdir)/riscv-newlib stamps/build-gcc-newlib-stage1
@@ -259,7 +251,6 @@ stamps/build-newlib: $(srcdir)/riscv-newlib stamps/build-gcc-newlib-stage1
 		--enable-newlib-io-c99-formats \
 		CFLAGS_FOR_TARGET="-Os $(CFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
-	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
 
 stamps/build-gcc-newlib-stage2: $(srcdir)/riscv-gcc stamps/build-newlib
@@ -287,7 +278,6 @@ stamps/build-gcc-newlib-stage2: $(srcdir)/riscv-gcc stamps/build-newlib
 		$(WITH_ARCH) \
 		CFLAGS_FOR_TARGET="-Os $(CFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
-	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
 
 .PHONY: check-gcc-newlib
@@ -312,4 +302,15 @@ distclean: clean
 	rm -rf src
 
 # All of the packages install themselves, so our install target does nothing.
-install:
+install-linux:
+	$(MAKE) -C build-binutils-linux install
+	$(foreach dir,$(addprefix stamps/build-glibc-linux-,$(MULTILIB_NAMES)),+flock $(SYSROOT)/.lock $(MAKE) -C $dir install install_root=$(SYSROOT))
+	$(MAKE) -C build-glibc-linux-headers install-headers
+	$(MAKE) -C build-gcc-linux-stage1 inhibit-libc=true install-gcc
+	$(MAKE) -C build-gcc-linux-stage1 inhibit-libc=true install-target-libgcc
+
+install-newlib:
+	$(MAKE) -C build-binutils-newlib install
+	$(MAKE) -C build-gcc-newlib-stage1 install-gcc
+	$(MAKE) -C build-newlib install
+	$(MAKE) -C build-gcc-newlib-stage2 install
